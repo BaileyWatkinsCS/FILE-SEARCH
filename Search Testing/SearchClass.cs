@@ -138,8 +138,8 @@ namespace Search_Testing
             Workbook workBook = _excelApp.Workbooks.Open(Wfile);
             
                         int numSheets = workBook.Sheets.Count;
-
-            while (numSheets > 0)
+            bool ExitNow = true;
+            while (numSheets > 0 && ExitNow != false)
             {
                 try
                 {
@@ -154,12 +154,7 @@ namespace Search_Testing
                     if (oRng != null)
                     {
                         filesThatConstainSSN.Add(Wfile);
-
-                        oWB.Close(false, missing, missing);
-
-                        oSheet = null;
-                        oWB = null;
-                        oXL.Quit();
+                        ExitNow = false;
                     }
                     else
                     {
