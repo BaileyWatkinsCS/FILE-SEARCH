@@ -30,8 +30,10 @@ namespace Search_Testing
             directorySearch = Console.ReadLine();
             Console.WriteLine("***************************************");
 
+
+
             // doc files
-             docFiles = DirSearchWord(directorySearch);
+            docFiles = DirSearchWord(directorySearch);
 
             List<string> DirSearchWord(string ds)
             {
@@ -41,25 +43,48 @@ namespace Search_Testing
                 {
                     foreach (string file in Directory.GetFiles(ds, "*.doc"))
                     {
-                        //docFiles = Directory.GetFiles(directorySearch, "*.doc", SearchOption.AllDirectories).ToList();
-                        Word.Application app = new Word.Application();
 
-                        //^?^?^?  -   ^?^?  -  ^?^?^?^?
-                        //the ^? finds any digit and the dash makes sure you get the correct form
-                        FindWord(app, "^#^#^#-^#^#-^#^#^#^#", file);
-                        Console.WriteLine(file);
-                    }
+                            Word.Application app = new Word.Application();
 
-                    foreach (string directory in Directory.GetDirectories(ds))
-                    {
-                        docFiles.AddRange(DirSearchWord(directory));
-                    }
+                            try
+                            {
+
+                                //^?^?^?  -   ^?^?  -  ^?^?^?^?
+                                //the ^? finds any digit and the dash makes sure you get the correct form
+                                FindWord
+                                (app, "^#^#^#-^#^#-^#^#^#^#", file);
+                                Console.WriteLine(file);
+
+
+                        }
+
+                            catch (System.Exception excpt)
+                            {
+                                Console.WriteLine(excpt.Message + " : " + file);
+
+
+                            }
+
+                        app.Quit();
+                        }
+
+                        foreach (string directory in Directory.GetDirectories(ds))
+                        {
+                            docFiles.AddRange(DirSearchWord(directory));
+
+                        }
+                    
+
                 }
                 catch (System.Exception excpt)
                 {
                     Console.WriteLine(excpt.Message);
+                    
                 }
+
+
                 return docFiles;
+
             }
 
 
@@ -75,10 +100,12 @@ namespace Search_Testing
                 {
                     foreach (string file in Directory.GetFiles(ds, "*.xlsx"))
                     {
+                        Microsoft.Office.Interop.Excel.Application oXL = new Microsoft.Office.Interop.Excel.Application();
                         //? is used for any charcter in excel
-                        FindExcel("???-??-????", file);
+                        FindExcel(oXL,"???-??-????", file);
 
                         Console.WriteLine(file);
+                        
 
                     }
 
@@ -99,7 +126,6 @@ namespace Search_Testing
 
             List<string> DirSearchPDF(string ds)
             {
-
 
                 try
                 {
@@ -139,15 +165,14 @@ namespace Search_Testing
         public static void FindWord(Word.Application WordApp, object findText, string Wfile)
         {
 
-            Word.Application objWordApp = new Word.Application();
 
-            objWordApp.Visible = false;
+            WordApp.Visible = false;
             object missing = System.Reflection.Missing.Value;
 
             object filename = Wfile;
 
             Microsoft.Office.Interop.Word.Document objDoc;
-            objDoc = objWordApp.Documents.Open(ref filename, ref missing, ref missing, ref missing,
+            objDoc = WordApp.Documents.Open(ref filename, ref missing, ref missing, ref missing,
          ref missing, ref missing, ref missing, ref missing,
          ref missing, ref missing, ref missing, ref missing, ref missing, ref missing,
                             ref missing, ref missing);
@@ -168,31 +193,31 @@ namespace Search_Testing
                     //Moves on
                 }
                 objDoc.Close(ref missing, ref missing, ref missing);
-                objWordApp.Application.Quit(ref missing, ref missing, ref missing);
+                WordApp.Application.Quit(ref missing, ref missing, ref missing);
             }
             catch (Exception ex)
             {
                 objDoc.Close(ref missing, ref missing, ref missing);
-                objWordApp.Application.Quit(ref missing, ref missing, ref missing);
+                WordApp.Application.Quit(ref missing, ref missing, ref missing);
             }
+
 
         }
 
 
 
 
-        private static void FindExcel(string findText, string Wfile)
+        private static void FindExcel(Excel.Application oXL,string findText, string Wfile)
         {
             
             string File_name = Wfile;
-            Microsoft.Office.Interop.Excel.Application oXL = new Microsoft.Office.Interop.Excel.Application();
             Microsoft.Office.Interop.Excel.Workbook oWB;
             Microsoft.Office.Interop.Excel.Worksheet oSheet;
 
             Application _excelApp = new Application();
             Workbook workBook = _excelApp.Workbooks.Open(Wfile);
             
-                        int numSheets = workBook.Sheets.Count;
+            int numSheets = workBook.Sheets.Count;
             bool ExitNow = true;
             while (numSheets > 0 && ExitNow != false)
             {
@@ -210,22 +235,29 @@ namespace Search_Testing
                     {
                         filesThatConstainSSN.Add(Wfile);
                         ExitNow = false;
+
                     }
                     else
                     {
 
                     }
-                    oWB.Close(false, missing, missing);
 
                     oSheet = null;
-                    oWB = null;
+                    oWB.Close();
                     oXL.Quit();
+                    workBook.Close();
+                    _excelApp.Application.Quit();
+
                 }
                 catch (Exception ex)
                 {
-
+                    oSheet = null;
+                    oXL.Quit();
+                    workBook.Close();
+                    _excelApp.Application.Quit();
                 }
                 numSheets--;
+
             }
         }
 
