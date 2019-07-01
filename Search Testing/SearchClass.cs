@@ -15,6 +15,8 @@ namespace Search_Testing
     {
         static List<string> filesThatConstainSSN = new List<string>();
 
+
+
         public static void Main(string[] args)
         {
             String directorySearch;
@@ -22,50 +24,103 @@ namespace Search_Testing
             List<string> excelFiles = new List<string>();
             List<string> pdfFiles = new List<string>();
 
-            //random comment
 
             //Console Enter
             Console.WriteLine("Enter File Path");
             directorySearch = Console.ReadLine();
             Console.WriteLine("***************************************");
 
+            // doc files
+             docFiles = DirSearchWord(directorySearch);
 
-
-            //Word Documents
-            docFiles = Directory.GetFiles(directorySearch, "*.doc", SearchOption.AllDirectories).ToList();
-
-            foreach (string file in docFiles)
+            List<string> DirSearchWord(string ds)
             {
-                Word.Application app = new Word.Application();
 
-                //^?^?^?  -   ^?^?  -  ^?^?^?^?
-                //the ^? finds any digit and the dash makes sure you get the correct form
-                FindWord(app, "^#^#^#-^#^#-^#^#^#^#", file);
-                Console.WriteLine(file);
 
+                try
+                {
+                    foreach (string file in Directory.GetFiles(ds, "*.doc"))
+                    {
+                        //docFiles = Directory.GetFiles(directorySearch, "*.doc", SearchOption.AllDirectories).ToList();
+                        Word.Application app = new Word.Application();
+
+                        //^?^?^?  -   ^?^?  -  ^?^?^?^?
+                        //the ^? finds any digit and the dash makes sure you get the correct form
+                        FindWord(app, "^#^#^#-^#^#-^#^#^#^#", file);
+                        Console.WriteLine(file);
+                    }
+
+                    foreach (string directory in Directory.GetDirectories(ds))
+                    {
+                        docFiles.AddRange(DirSearchWord(directory));
+                    }
+                }
+                catch (System.Exception excpt)
+                {
+                    Console.WriteLine(excpt.Message);
+                }
+                return docFiles;
             }
+
 
 
             //Excel Documents
-            excelFiles = Directory.GetFiles(directorySearch, "*.xlsx", SearchOption.AllDirectories).ToList();
+            excelFiles = DirSearchExcel(directorySearch);
 
-            foreach (string file in excelFiles)
+            List<string> DirSearchExcel(string ds)
             {
-                //? is used for any charcter in excel
-                FindExcel("???-??-????", file);
 
-                Console.WriteLine(file);
+
+                try
+                {
+                    foreach (string file in Directory.GetFiles(ds, "*.xlsx"))
+                    {
+                        //? is used for any charcter in excel
+                        FindExcel("???-??-????", file);
+
+                        Console.WriteLine(file);
+
+                    }
+
+                    foreach (string directory in Directory.GetDirectories(ds))
+                    {
+                        excelFiles.AddRange(DirSearchExcel(directory));
+                    }
+                }
+                catch (System.Exception excpt)
+                {
+                    Console.WriteLine(excpt.Message);
+                }
+                return excelFiles;
             }
 
+            //pdf documents
+            pdfFiles = DirSearchPDF(directorySearch);
 
-
-
-            pdfFiles = Directory.GetFiles(directorySearch, "*.pdf", SearchOption.AllDirectories).ToList();
-
-            foreach (string file in pdfFiles)
+            List<string> DirSearchPDF(string ds)
             {
-                Console.WriteLine(file);
+
+
+                try
+                {
+                    foreach (string file in Directory.GetFiles(ds, "*.pdf"))
+                    {
+                        Console.WriteLine(file);
+
+                    }
+
+                    foreach (string directory in Directory.GetDirectories(ds))
+                    {
+                        pdfFiles.AddRange(DirSearchPDF(directory));
+                    }
+                }
+                catch (System.Exception excpt)
+                {
+                    Console.WriteLine(excpt.Message);
+                }
+                return pdfFiles;
             }
+
 
             Console.WriteLine("***************************************");
             Console.WriteLine("Files That Contain SSN Formating: ");
@@ -185,7 +240,7 @@ namespace Search_Testing
                            Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
                            Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
             return currentFind;
-        }
+        } 
     }
 }
 
