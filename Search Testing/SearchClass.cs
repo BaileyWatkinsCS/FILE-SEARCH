@@ -127,6 +127,11 @@ namespace Search_Testing
                 }
                 return pdfFiles;
             }
+            using (TextWriter tw = new StreamWriter("FilesThatContainSSN.txt"))
+            {
+                foreach (String s in filesThatConstainSSN)
+                    tw.WriteLine(s);
+            }
 
             Console.WriteLine("***************************************");
             Console.WriteLine("Files That Contain SSN Formating: ");
@@ -239,23 +244,13 @@ namespace Search_Testing
 
         private static void FindPdf(string text, string fileName)
         {
-            /*
-             * if text contains ssn
-             * add filename
-             * 
-             * 
-             */
-            //string[] regex = Regex.Split(text, @"^\d{ 3 } -\d{ 2}-\d{ 4}$");
-            Match regex1 = Regex.Match(text, @"^\d{ 3 } -\d{ 2}-\d{ 4}$");
-            if(regex1.Success)
-            {
-                Console.WriteLine("Success");
-                filesThatConstainSSN.Add(fileName);
-            }
-            //if (regex.Length > 0)
-            //{
 
-            //}
+            bool containsSSN = Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d");
+
+            if (containsSSN)
+            {
+               filesThatConstainSSN.Add(fileName);
+            }
         }
 
         private static Microsoft.Office.Interop.Excel.Range GetSpecifiedRange(string matchStr, Microsoft.Office.Interop.Excel.Worksheet objWs)
