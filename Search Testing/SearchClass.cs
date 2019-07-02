@@ -160,8 +160,8 @@ namespace Search_Testing
         {
             
             string File_name = Wfile;
-            Microsoft.Office.Interop.Excel.Workbook oWB;
-            Microsoft.Office.Interop.Excel.Worksheet oSheet;
+            Microsoft.Office.Interop.Excel.Workbook oWB = null;
+            Microsoft.Office.Interop.Excel.Worksheet oSheet = null;
 
             Application _excelApp = new Application();
             Workbook workBook = _excelApp.Workbooks.Open(Wfile);
@@ -184,19 +184,40 @@ namespace Search_Testing
                         ExitNow = false;
 
                     }
-                    oSheet = null;
-                    oWB.Close();
+
+                    oXL.DisplayAlerts = false;
+                    workBook.Close(null, null, null);
+                    oXL.Workbooks.Close();
                     oXL.Quit();
-                    workBook.Close();
-                    _excelApp.Application.Quit();
+                    if (oSheet != null)
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(oSheet);
+                    if (workBook != null)
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(workBook);
+                    if (oXL != null)
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(oXL);
+                    oSheet = null;
+                    workBook = null;
+                    oXL = null;
+                    GC.Collect();
 
                 }
                 catch (Exception ex)
                 {
-                    oSheet = null;
+
+                    oXL.DisplayAlerts = false;
+                    workBook.Close(null, null, null);
+                    oXL.Workbooks.Close();
                     oXL.Quit();
-                    workBook.Close();
-                    _excelApp.Application.Quit();
+                    if (oSheet != null)
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(oSheet);
+                    if (workBook != null)
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(workBook);
+                    if (oXL != null)
+                        System.Runtime.InteropServices.Marshal.ReleaseComObject(oXL);
+                    oSheet = null;
+                    workBook = null;
+                    oXL = null;
+                    GC.Collect();
                 }
                 numSheets--;
 
