@@ -4,10 +4,12 @@ using System.IO;
 using System.Linq;
 using Microsoft.Office.Interop.Word;
 using Word = Microsoft.Office.Interop.Word;
+using Extractor;
 using Excel = Microsoft.Office.Interop.Excel;
 using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
 using Range = Microsoft.Office.Interop.Excel.Range;
+using System.Text.RegularExpressions;
 
 namespace Search_Testing
 {
@@ -93,6 +95,8 @@ namespace Search_Testing
 
             //pdf documents
             pdfFiles = DirSearchPDF(directorySearch);
+            string currentPdfText;
+            ExtractPDF currPdf;
 
             List<string> DirSearchPDF(string ds)
             {
@@ -100,8 +104,17 @@ namespace Search_Testing
                 {
                     foreach (string file in Directory.GetFiles(ds, "*.pdf"))
                     {
-                        Console.WriteLine(file);
-
+                        currPdf = new ExtractPDF(file);
+                        currentPdfText = currPdf.extract();
+                        if(currentPdfText == "Filename is incorrect or cannot be found.")
+                        {
+                            Console.WriteLine("Couldn't read {0}.",file);
+                        }
+                        else
+                        {
+                            Console.WriteLine(file);
+                            FindPdf(currentPdfText, file);
+                        }
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
                     {
@@ -222,6 +235,27 @@ namespace Search_Testing
                 numSheets--;
 
             }
+        }
+
+        private static void FindPdf(string text, string fileName)
+        {
+            /*
+             * if text contains ssn
+             * add filename
+             * 
+             * 
+             */
+            //string[] regex = Regex.Split(text, @"^\d{ 3 } -\d{ 2}-\d{ 4}$");
+            Match regex1 = Regex.Match(text, @"^\d{ 3 } -\d{ 2}-\d{ 4}$");
+            if(regex1.Success)
+            {
+                Console.WriteLine("Success");
+                filesThatConstainSSN.Add(fileName);
+            }
+            //if (regex.Length > 0)
+            //{
+
+            //}
         }
 
         private static Microsoft.Office.Interop.Excel.Range GetSpecifiedRange(string matchStr, Microsoft.Office.Interop.Excel.Worksheet objWs)
