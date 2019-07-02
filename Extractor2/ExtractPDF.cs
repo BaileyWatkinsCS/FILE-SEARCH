@@ -15,6 +15,7 @@ namespace Extractor2
     {
         string filename;
 
+
         public ExtractPDF(string filename)
         {
             this.filename = filename;
