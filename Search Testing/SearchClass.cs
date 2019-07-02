@@ -10,12 +10,17 @@ using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
 using Range = Microsoft.Office.Interop.Excel.Range;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace Search_Testing
 {
     class SearchClass
     {
         static List<string> filesThatConstainSSN = new List<string>();
+
+        //Need this for dialog box to save dont know why?
+        [STAThread]
+
 
         public static void Main(string[] args)
         {
@@ -118,16 +123,44 @@ namespace Search_Testing
                 return pdfFiles;
             }
 
-            using (TextWriter tw = new StreamWriter("FilesThatContainSSN.txt"))
-            {
-                foreach (String s in filesThatConstainSSN)
-                    tw.WriteLine(s);
-            }
+
+
+            //using (TextWriter tw = new StreamWriter("FilesThatContainSSN.txt"))
+            //{
+            //    foreach (String s in filesThatConstainSSN)
+            //        tw.WriteLine(s);
+            //}
+
             Console.WriteLine("***************************************");
             Console.WriteLine("Files That Contain SSN Formating: ");
             Console.WriteLine("");
             filesThatConstainSSN.ForEach(Console.WriteLine);
             Console.ReadLine();
+
+
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.InitialDirectory = @"*\Documents";
+            saveFileDialog1.Filter = "Microsoft Word Documents|*.DOC | txt files (*.txt)|*.txt|All files (*.*)|*.*"; // or just "txt files (*.txt)|*.txt" if you only want to save text files
+            saveFileDialog1.FilterIndex = 2;
+            saveFileDialog1.RestoreDirectory = true;
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+
+                using (StreamWriter writer = new StreamWriter(saveFileDialog1.FileName))
+                {
+                    foreach (String s in filesThatConstainSSN)
+                        writer.WriteLine(s);
+                    writer.Close();
+                }
+
+                //using (StreamWriter writer = new StreamWriter(saveFileDialog1.FileName + "ErrorFile"))
+                //{
+                //    foreach (String s in ErrorList)
+                //        writer.WriteLine(s);
+                //    writer.Close();
+                //}
+            }
             Console.ReadLine();
         }
 
