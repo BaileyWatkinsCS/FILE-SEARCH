@@ -219,20 +219,7 @@ namespace Search_Testing
                         filesThatConstainSSN.Add(Wfile);
                         ExitNow = false;
                     }
-                    oXL.DisplayAlerts = false;
-                    workBook.Close(null, null, null);
-                    oXL.Workbooks.Close();
-                    oXL.Quit();
-                    if (oSheet != null)
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(oSheet);
-                    if (workBook != null)
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(workBook);
-                    if (oXL != null)
-                        System.Runtime.InteropServices.Marshal.ReleaseComObject(oXL);
-                    oSheet = null;
-                    workBook = null;
-                    oXL = null;
-                    GC.Collect();
+
                 }
                 catch (Exception)
                 {
@@ -253,6 +240,22 @@ namespace Search_Testing
                 }
                 numSheets--;
             }
+
+            //final cleanup
+            oXL.DisplayAlerts = false;
+            workBook.Close(null, null, null);
+            oXL.Workbooks.Close();
+            oXL.Quit();
+            if (oSheet != null)
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(oSheet);
+            if (workBook != null)
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(workBook);
+            if (oXL != null)
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(oXL);
+            oSheet = null;
+            workBook = null;
+            oXL = null;
+            GC.Collect();
         }
 
         private static void FindPdf(string text, string fileName)
