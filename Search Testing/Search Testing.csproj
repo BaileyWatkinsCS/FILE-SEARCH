@@ -121,9 +121,9 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Extractor\Extractor.csproj">
-      <Project>{eb0ddcf2-97dd-47bd-ad2c-602eadb05ffc}</Project>
-      <Name>Extractor</Name>
+    <ProjectReference Include="..\Extractor2\Extractor2.csproj">
+      <Project>{5d8c8752-877a-45d2-bc2a-c6395dd68691}</Project>
+      <Name>Extractor2</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Office.Interop.Word;
 using Word = Microsoft.Office.Interop.Word;
-using Extractor;
+using Extractor2;
 using Excel = Microsoft.Office.Interop.Excel;
 using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
@@ -23,16 +23,12 @@ namespace Search_Testing
             List<string> docFiles = new List<string>();
             List<string> excelFiles = new List<string>();
             List<string> pdfFiles = new List<string>();
-
-
             //Console Enter
             Console.WriteLine("Enter File Path");
             directorySearch = Console.ReadLine();
             Console.WriteLine("***************************************");
-
             // doc files
             docFiles = DirSearchWord(directorySearch);
-
             List<string> DirSearchWord(string ds)
             {
                 try
@@ -44,8 +40,7 @@ namespace Search_Testing
                         {
                             //^?^?^?  -   ^?^?  -  ^?^?^?^?
                             //the ^? finds any digit and the dash makes sure you get the correct form
-                            FindWord
-                            (app, "^#^#^#-^#^#-^#^#^#^#", file);
+                            FindWord(app, "^#^#^#-^#^#-^#^#^#^#", file);
                             Console.WriteLine(file);
                         }
                         catch (System.Exception excpt)
@@ -54,7 +49,6 @@ namespace Search_Testing
                         }
                         app.Quit();
                     }
-
                     foreach (string directory in Directory.GetDirectories(ds))
                     {
                         docFiles.AddRange(DirSearchWord(directory));
@@ -66,10 +60,8 @@ namespace Search_Testing
                 }
                 return docFiles;
             }
-
             //Excel Documents
             excelFiles = DirSearchExcel(directorySearch);
-
             List<string> DirSearchExcel(string ds)
             {
                 try
@@ -92,12 +84,10 @@ namespace Search_Testing
                 }
                 return excelFiles;
             }
-
             //pdf documents
             pdfFiles = DirSearchPDF(directorySearch);
             string currentPdfText;
             ExtractPDF currPdf;
-
             List<string> DirSearchPDF(string ds)
             {
                 try
@@ -132,7 +122,6 @@ namespace Search_Testing
                 foreach (String s in filesThatConstainSSN)
                     tw.WriteLine(s);
             }
-
             Console.WriteLine("***************************************");
             Console.WriteLine("Files That Contain SSN Formating: ");
             Console.WriteLine("");
@@ -145,9 +134,7 @@ namespace Search_Testing
         {
             WordApp.Visible = false;
             object missing = System.Reflection.Missing.Value;
-
             object filename = Wfile;
-
             Microsoft.Office.Interop.Word.Document objDoc;
             objDoc = WordApp.Documents.Open(ref filename, ref missing, ref missing, ref missing,
             ref missing, ref missing, ref missing, ref missing,
@@ -176,14 +163,11 @@ namespace Search_Testing
 
         private static void FindExcel(Excel.Application oXL,string findText, string Wfile)
         {
-            
             string File_name = Wfile;
             Microsoft.Office.Interop.Excel.Workbook oWB = null;
             Microsoft.Office.Interop.Excel.Worksheet oSheet = null;
-
             Application _excelApp = new Application();
-            Workbook workBook = _excelApp.Workbooks.Open(Wfile);
-            
+            Workbook workBook = _excelApp.Workbooks.Open(Wfile);            
             int numSheets = workBook.Sheets.Count;
             bool ExitNow = true;
             while (numSheets > 0 && ExitNow != false)
@@ -200,9 +184,7 @@ namespace Search_Testing
                     {
                         filesThatConstainSSN.Add(Wfile);
                         ExitNow = false;
-
                     }
-
                     oXL.DisplayAlerts = false;
                     workBook.Close(null, null, null);
                     oXL.Workbooks.Close();
@@ -217,11 +199,9 @@ namespace Search_Testing
                     workBook = null;
                     oXL = null;
                     GC.Collect();
-
                 }
                 catch (Exception ex)
                 {
-
                     oXL.DisplayAlerts = false;
                     workBook.Close(null, null, null);
                     oXL.Workbooks.Close();
@@ -238,15 +218,12 @@ namespace Search_Testing
                     GC.Collect();
                 }
                 numSheets--;
-
             }
         }
 
         private static void FindPdf(string text, string fileName)
         {
-
             bool containsSSN = Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d");
-
             if (containsSSN)
             {
                filesThatConstainSSN.Add(fileName);
