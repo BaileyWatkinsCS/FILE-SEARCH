@@ -117,6 +117,7 @@ namespace Search_Testing
                 }
                 return pdfFiles;
             }
+
             using (TextWriter tw = new StreamWriter("FilesThatContainSSN.txt"))
             {
                 foreach (String s in filesThatConstainSSN)
@@ -154,7 +155,7 @@ namespace Search_Testing
                 objDoc.Close(ref missing, ref missing, ref missing);
                 WordApp.Application.Quit(ref missing, ref missing, ref missing);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 objDoc.Close(ref missing, ref missing, ref missing);
                 WordApp.Application.Quit(ref missing, ref missing, ref missing);
@@ -200,7 +201,7 @@ namespace Search_Testing
                     oXL = null;
                     GC.Collect();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     oXL.DisplayAlerts = false;
                     workBook.Close(null, null, null);
@@ -234,7 +235,6 @@ namespace Search_Testing
         {
             object missing = System.Reflection.Missing.Value;
             Microsoft.Office.Interop.Excel.Range currentFind = null;
-            Microsoft.Office.Interop.Excel.Range firstFind = null;
             currentFind = objWs.get_Range("A1", "AM100").Find(matchStr, missing,
                            Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
                            Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
