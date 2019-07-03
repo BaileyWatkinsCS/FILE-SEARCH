@@ -17,10 +17,12 @@ namespace Search_Testing
     class SearchClass
     {
         static List<string> filesThatConstainSSN = new List<string>();
+        static List<string> accessDenied = new List<string>();
+        static List<string> corrupted = new List<string>();
+        static List<string> generalErrors = new List<string>();
 
         //Need this for dialog box to save dont know why?
         [STAThread]
-
 
         public static void Main(string[] args)
         {
@@ -123,14 +125,6 @@ namespace Search_Testing
                 return pdfFiles;
             }
 
-
-
-            //using (TextWriter tw = new StreamWriter("FilesThatContainSSN.txt"))
-            //{
-            //    foreach (String s in filesThatConstainSSN)
-            //        tw.WriteLine(s);
-            //}
-
             Console.WriteLine("***************************************");
             Console.WriteLine("Files That Contain SSN Formating: ");
             Console.WriteLine("");
@@ -153,13 +147,6 @@ namespace Search_Testing
                         writer.WriteLine(s);
                     writer.Close();
                 }
-
-                //using (StreamWriter writer = new StreamWriter(saveFileDialog1.FileName + "ErrorFile"))
-                //{
-                //    foreach (String s in ErrorList)
-                //        writer.WriteLine(s);
-                //    writer.Close();
-                //}
             }
             Console.ReadLine();
         }
