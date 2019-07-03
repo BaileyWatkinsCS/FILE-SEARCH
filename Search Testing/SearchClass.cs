@@ -30,11 +30,16 @@ namespace Search_Testing
             List<string> docFiles = new List<string>();
             List<string> excelFiles = new List<string>();
             List<string> pdfFiles = new List<string>();
+
+
             //Console Enter
             Console.WriteLine("Enter File Path");
             directorySearch = Console.ReadLine();
             Console.WriteLine("***************************************");
+            
+            
             // doc files
+
             docFiles = DirSearchWord(directorySearch);
             List<string> DirSearchWord(string ds)
             {
@@ -50,10 +55,11 @@ namespace Search_Testing
                             FindWord(app, "^#^#^#-^#^#-^#^#^#^#", file);
                             Console.WriteLine(file);
                         }
-                        catch (System.Exception excpt)
+                        catch(System.Runtime.InteropServices.COMException)
                         {
-                            Console.WriteLine(excpt.Message + " : " + file);
+                            corrupted.Add(file);
                         }
+
                         app.Quit();
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
@@ -61,12 +67,19 @@ namespace Search_Testing
                         docFiles.AddRange(DirSearchWord(directory));
                     }
                 }
-                catch (System.Exception excpt)
+
+                catch (System.UnauthorizedAccessException)
                 {
-                    Console.WriteLine(excpt.Message);
+                    accessDenied.Add(ds);
+                }
+
+                catch (System.Exception)
+                {
+                    generalErrors.Add(ds);
                 }
                 return docFiles;
             }
+
             //Excel Documents
             excelFiles = DirSearchExcel(directorySearch);
             List<string> DirSearchExcel(string ds)
@@ -75,22 +88,35 @@ namespace Search_Testing
                 {
                     foreach (string file in Directory.GetFiles(ds, "*.xlsx"))
                     {
-                        Microsoft.Office.Interop.Excel.Application oXL = new Microsoft.Office.Interop.Excel.Application();
-                        //? is used for any charcter in excel
-                        FindExcel(oXL,"???-??-????", file);
-                        Console.WriteLine(file);
+                        try
+                        {
+                            Microsoft.Office.Interop.Excel.Application oXL = new Microsoft.Office.Interop.Excel.Application();
+                            //? is used for any charcter in excel
+                            FindExcel(oXL, "???-??-????", file);
+                            Console.WriteLine(file);
+                        }
+                        catch (System.Runtime.InteropServices.COMException)
+                        {
+                            corrupted.Add(file);
+                        }
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
                     {
                         excelFiles.AddRange(DirSearchExcel(directory));
                     }
                 }
-                catch (System.Exception excpt)
+                catch (System.UnauthorizedAccessException)
                 {
-                    Console.WriteLine(excpt.Message);
+                    accessDenied.Add(ds);
+                }
+
+                catch (System.Exception)
+                {
+                    generalErrors.Add(ds);
                 }
                 return excelFiles;
             }
+
             //pdf documents
             pdfFiles = DirSearchPDF(directorySearch);
             string currentPdfText;
@@ -101,31 +127,47 @@ namespace Search_Testing
                 {
                     foreach (string file in Directory.GetFiles(ds, "*.pdf"))
                     {
-                        currPdf = new ExtractPDF(file);
-                        currentPdfText = currPdf.extract();
-                        if(currentPdfText == "Filename is incorrect or cannot be found.")
+                        try
                         {
-                            Console.WriteLine("Couldn't read {0}.",file);
+                            currPdf = new ExtractPDF(file);
+                            currentPdfText = currPdf.extract();
+                            if (currentPdfText == "Filename is incorrect or cannot be found.")
+                            {
+                                Console.WriteLine("Couldn't read {0}.", file);
+                            }
+                            else
+                            {
+                                Console.WriteLine(file);
+                                FindPdf(currentPdfText, file);
+                            }
                         }
-                        else
+                        catch (System.Runtime.InteropServices.COMException)
                         {
-                            Console.WriteLine(file);
-                            FindPdf(currentPdfText, file);
+                            corrupted.Add(file);
                         }
+
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
                     {
                         pdfFiles.AddRange(DirSearchPDF(directory));
                     }
                 }
-                catch (System.Exception excpt)
+                catch (System.UnauthorizedAccessException)
                 {
-                    Console.WriteLine(excpt.Message);
+                    accessDenied.Add(ds);
+                }
+
+                catch (System.Exception )
+                {
+                    generalErrors.Add(ds);
                 }
                 return pdfFiles;
             }
 
+
+
             Console.WriteLine("***************************************");
+            accessDenied = accessDenied.Distinct().ToList();
             Console.WriteLine("Files That Contain SSN Formating: ");
             Console.WriteLine("");
             filesThatConstainSSN.ForEach(Console.WriteLine);
@@ -133,6 +175,7 @@ namespace Search_Testing
 
 
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
             saveFileDialog1.InitialDirectory = @"*\Documents";
             saveFileDialog1.Filter = "Microsoft Word Documents|*.DOC | txt files (*.txt)|*.txt|All files (*.*)|*.*"; // or just "txt files (*.txt)|*.txt" if you only want to save text files
             saveFileDialog1.FilterIndex = 2;
@@ -140,13 +183,40 @@ namespace Search_Testing
 
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-
-                using (StreamWriter writer = new StreamWriter(saveFileDialog1.FileName))
+                StreamWriter writer = new StreamWriter(saveFileDialog1.FileName);
+                using (writer)
                 {
+                    writer.WriteLine("****Files that contain SSN Numbers****");
                     foreach (String s in filesThatConstainSSN)
+                    {
                         writer.WriteLine(s);
+                    }
+                    writer.WriteLine();
+                    writer.WriteLine();
+                    writer.WriteLine("***********Acces Was Denied***********");
+                    foreach (String ad in accessDenied)
+                    {
+                        writer.WriteLine(ad);
+                    }
+                    writer.WriteLine();
+                    writer.WriteLine("***********Corrupted File*************");
+                    foreach (String c in corrupted)
+                    {
+                        writer.WriteLine(c);
+                    }
+                    writer.WriteLine();
+                    writer.WriteLine("********Unkown/General Errors*********");
+                    foreach (String ge in generalErrors)
+                    {
+                        writer.WriteLine(ge);
+                    }
+
+
                     writer.Close();
+
                 }
+
+
             }
             Console.ReadLine();
         }
