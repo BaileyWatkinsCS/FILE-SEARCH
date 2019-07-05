@@ -45,7 +45,7 @@ namespace Search_Testing
             {
                 try
                 {
-                    foreach (string file in Directory.GetFiles(ds, "*.doc"))
+                    foreach (string file in Directory.GetFiles(ds, "*.doc*", SearchOption.AllDirectories))
                     {
                         Word.Application app = new Word.Application();
                         try
@@ -243,7 +243,11 @@ namespace Search_Testing
                 {
                     containsSSN = true;
                 }
-                if(containsSSN)
+                if (text.ToString().ToLower().Contains("social security number") || text.ToString().ToLower().Contains("ssn") || text.ToString().ToLower().Contains("ss#"))
+                {
+                    containsSSN = true;
+                }
+                if (containsSSN)
                 {
                     filesThatConstainSSN.Add(Wfile);
                 }
@@ -289,6 +293,10 @@ namespace Search_Testing
                             containsSSN = Regex.IsMatch(str, @"\D\d\d\d-\d\d-\d\d\d\d");
                         }
                         if (!containsSSN && Regex.IsMatch(str, @"\d\d\d-\d\d-\d\d\d\d") && str.Length == 11)
+                        {
+                            containsSSN = true;
+                        }
+                        if (str.ToString().ToLower().Contains("social security number") || str.ToString().ToLower().Contains("ssn") || str.ToString().ToLower().Contains("ss#"))
                         {
                             containsSSN = true;
                         }
@@ -348,6 +356,10 @@ namespace Search_Testing
                 containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d");
             }
             if (!containsSSN && Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d") && text.Length == 11)
+            {
+                containsSSN = true;
+            }
+            if (text.ToString().ToLower().Contains("social security number") || text.ToString().ToLower().Contains("ssn") || text.ToString().ToLower().Contains("ss#"))
             {
                 containsSSN = true;
             }
