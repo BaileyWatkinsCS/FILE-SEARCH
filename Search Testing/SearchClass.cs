@@ -45,7 +45,7 @@ namespace Search_Testing
             {
                 try
                 {
-                    foreach (string file in Directory.GetFiles(ds, "*.doc*", SearchOption.AllDirectories))
+                    foreach (string file in Directory.GetFiles(ds, "*.doc*"))
                     {
                         Word.Application app = new Word.Application();
                         try
