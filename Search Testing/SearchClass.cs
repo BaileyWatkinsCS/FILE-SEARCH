@@ -59,7 +59,6 @@ namespace Search_Testing
                         {
                             corrupted.Add(file);
                         }
-
                         app.Quit();
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
@@ -164,8 +163,6 @@ namespace Search_Testing
                 return pdfFiles;
             }
 
-
-
             Console.WriteLine("***************************************");
             accessDenied = accessDenied.Distinct().ToList();
             Console.WriteLine("Files That Contain SSN Formating: ");
@@ -234,10 +231,25 @@ namespace Search_Testing
             objDoc.Content.Find.ClearFormatting();
             try
             {
-                if (objDoc.Content.Find.Execute(ref findText,
-                ref missing, ref missing, ref missing, ref missing, ref missing, ref missing,
-                ref missing, ref missing, ref missing, ref missing, ref missing, ref missing,
-                ref missing, ref missing))
+                string text = objDoc.Content.Text;
+                bool containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d\D");
+                if (!containsSSN)
+                {
+                    containsSSN = Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d\D");
+                }
+                if (!containsSSN)
+                {
+                    containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d");
+                }
+                if (!containsSSN && Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d") && text.Length == 11)
+                {
+                    containsSSN = true;
+                }
+                if(containsSSN)
+                //if (objDoc.Content.Find.Execute(ref findText,
+                //ref missing, ref missing, ref missing, ref missing, ref missing, ref missing,
+                //ref missing, ref missing, ref missing, ref missing, ref missing, ref missing,
+                //ref missing, ref missing))
                 {
                     //Finds Text
                     filesThatConstainSSN.Add(Wfile);
@@ -271,12 +283,28 @@ namespace Search_Testing
                         missing, missing, missing, missing);
                     oSheet = (Microsoft.Office.Interop.Excel.Worksheet)oWB.Worksheets[numSheets];
                     Microsoft.Office.Interop.Excel.Range oRng = GetSpecifiedRange(findText, oSheet);
-                    if (oRng != null)
+                    if(oRng != null)
                     {
-                        filesThatConstainSSN.Add(Wfile);
-                        ExitNow = false;
+                        string str = oRng.Text;
+                        bool containsSSN = Regex.IsMatch(str, @"\D\d\d\d-\d\d-\d\d\d\d\D");
+                        if (!containsSSN)
+                        {
+                            containsSSN = Regex.IsMatch(str, @"\d\d\d-\d\d-\d\d\d\d\D");
+                        }
+                        if (!containsSSN)
+                        {
+                            containsSSN = Regex.IsMatch(str, @"\D\d\d\d-\d\d-\d\d\d\d");
+                        }
+                        if (!containsSSN && Regex.IsMatch(str, @"\d\d\d-\d\d-\d\d\d\d") && str.Length == 11)
+                        {
+                            containsSSN = true;
+                        }
+                        if (containsSSN)
+                        {
+                            filesThatConstainSSN.Add(Wfile);
+                            ExitNow = false;
+                        }
                     }
-
                 }
                 catch (Exception)
                 {
@@ -318,13 +346,17 @@ namespace Search_Testing
         private static void FindPdf(string text, string fileName)
         {
             bool containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d\D");
-            if(!containsSSN)
+            if (!containsSSN)
             {
                 containsSSN = Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d\D");
             }
             if (!containsSSN)
             {
                 containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d");
+            }
+            if (!containsSSN && Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d") && text.Length == 11)
+            {
+                containsSSN = true;
             }
             if (containsSSN)
             {
