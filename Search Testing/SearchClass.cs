@@ -11,6 +11,8 @@ using Application = Microsoft.Office.Interop.Excel.Application;
 using Range = Microsoft.Office.Interop.Excel.Range;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.FileIO;
+using System.Diagnostics;
 
 namespace Search_Testing
 {
@@ -30,11 +32,19 @@ namespace Search_Testing
             List<string> docFiles = new List<string>();
             List<string> excelFiles = new List<string>();
             List<string> pdfFiles = new List<string>();
+            string Print = "";
 
 
             //Console Enter
             Console.WriteLine("Enter File Path");
             directorySearch = Console.ReadLine();
+            while(!Directory.Exists(directorySearch))
+            {
+                Console.WriteLine("Enter a VALID File Path");
+                directorySearch = Console.ReadLine();
+            }
+
+
             Console.WriteLine("***************************************");
             
             
@@ -45,7 +55,9 @@ namespace Search_Testing
             {
                 try
                 {
-                    foreach (string file in Directory.GetFiles(ds, "*.doc*"))
+                    var files = Directory.EnumerateFiles(ds, "*.*", System.IO.SearchOption.AllDirectories)
+                        .Where(s => s.EndsWith(".doc") || s.EndsWith(".docx") || s.EndsWith(".DOC"));
+                    foreach (string file in files)
                     {
                         Word.Application app = new Word.Application();
                         try
@@ -56,6 +68,7 @@ namespace Search_Testing
                         catch(System.Runtime.InteropServices.COMException)
                         {
                             corrupted.Add(file);
+                            FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
                         }
                         app.Quit();
                     }
@@ -95,6 +108,7 @@ namespace Search_Testing
                         catch (System.Runtime.InteropServices.COMException)
                         {
                             corrupted.Add(file);
+                            FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
                         }
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
@@ -141,6 +155,7 @@ namespace Search_Testing
                         catch (System.Runtime.InteropServices.COMException)
                         {
                             corrupted.Add(file);
+                            FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
                         }
 
                     }
@@ -166,7 +181,6 @@ namespace Search_Testing
             Console.WriteLine("Files That Contain SSN Formating: ");
             Console.WriteLine("");
             filesThatConstainSSN.ForEach(Console.WriteLine);
-            Console.ReadLine();
 
 
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
@@ -178,6 +192,7 @@ namespace Search_Testing
 
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
+                Print = saveFileDialog1.FileName;
                 StreamWriter writer = new StreamWriter(saveFileDialog1.FileName);
                 using (writer)
                 {
@@ -195,6 +210,10 @@ namespace Search_Testing
                     }
                     writer.WriteLine();
                     writer.WriteLine("***********Corrupted File*************");
+                    writer.WriteLine("NOTE: If file was corrupted it was moved to the recycle bin!");
+                    writer.WriteLine("In most cases this is not used by you and is a invalid copy of a document");
+                    writer.WriteLine("If you want it back just go to the recycle bin and restore it!");
+                    writer.WriteLine("");
                     foreach (String c in corrupted)
                     {
                         writer.WriteLine(c);
@@ -213,7 +232,14 @@ namespace Search_Testing
 
 
             }
-            Console.ReadLine();
+            try
+            {
+                Process.Start(Print);
+            }
+            catch
+            {
+                Console.WriteLine("File Was Not Saved!");
+            }
         }
 
         public static void FindWord(Word.Application WordApp, string Wfile)
