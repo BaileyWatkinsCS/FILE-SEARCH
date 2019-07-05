@@ -50,9 +50,7 @@ namespace Search_Testing
                         Word.Application app = new Word.Application();
                         try
                         {
-                            //^?^?^?  -   ^?^?  -  ^?^?^?^?
-                            //the ^? finds any digit and the dash makes sure you get the correct form
-                            FindWord(app, "^#^#^#-^#^#-^#^#^#^#", file);
+                            FindWord(app, file);
                             Console.WriteLine(file);
                         }
                         catch(System.Runtime.InteropServices.COMException)
@@ -218,7 +216,7 @@ namespace Search_Testing
             Console.ReadLine();
         }
 
-        public static void FindWord(Word.Application WordApp, object findText, string Wfile)
+        public static void FindWord(Word.Application WordApp, string Wfile)
         {
             WordApp.Visible = false;
             object missing = System.Reflection.Missing.Value;
@@ -246,12 +244,7 @@ namespace Search_Testing
                     containsSSN = true;
                 }
                 if(containsSSN)
-                //if (objDoc.Content.Find.Execute(ref findText,
-                //ref missing, ref missing, ref missing, ref missing, ref missing, ref missing,
-                //ref missing, ref missing, ref missing, ref missing, ref missing, ref missing,
-                //ref missing, ref missing))
                 {
-                    //Finds Text
                     filesThatConstainSSN.Add(Wfile);
                 }
                 objDoc.Close(ref missing, ref missing, ref missing);
@@ -368,7 +361,7 @@ namespace Search_Testing
         {
             object missing = System.Reflection.Missing.Value;
             Microsoft.Office.Interop.Excel.Range currentFind = null;
-            currentFind = objWs.get_Range("A1", "AM100").Find(matchStr, missing,
+            currentFind = objWs.get_Range("A1", "AAA1000").Find(matchStr, missing,
                            Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
                            Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
                            Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
