@@ -317,7 +317,15 @@ namespace Search_Testing
 
         private static void FindPdf(string text, string fileName)
         {
-            bool containsSSN = Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d");
+            bool containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d\D");
+            if(!containsSSN)
+            {
+                containsSSN = Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d\D");
+            }
+            if (!containsSSN)
+            {
+                containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d");
+            }
             if (containsSSN)
             {
                filesThatConstainSSN.Add(fileName);
