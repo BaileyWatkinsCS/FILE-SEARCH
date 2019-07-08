@@ -151,7 +151,7 @@ namespace Search_Testing
                             else
                             {
                                 Console.WriteLine(file);
-                                FindPdf(currentPdfText, file);
+                                FindTextDoc(currentPdfText, file);
                             }
                         }
                         catch (System.Runtime.InteropServices.COMException)
@@ -413,30 +413,7 @@ namespace Search_Testing
             GC.Collect();
         }
 
-        private static void FindPdf(string text, string fileName)
-        {
-            bool containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d\D");
-            if (!containsSSN)
-            {
-                containsSSN = Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d\D");
-            }
-            if (!containsSSN)
-            {
-                containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d");
-            }
-            if (!containsSSN && Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d") && text.Length == 11)
-            {
-                containsSSN = true;
-            }
-            if (text.ToString().ToLower().Contains("social security number") || text.ToString().ToLower().Contains("ssn") || text.ToString().ToLower().Contains("ss#"))
-            {
-                containsSSN = true;
-            }
-            if (containsSSN)
-            {
-               filesThatConstainSSN.Add(fileName);
-            }
-        }
+        
 
         private static void FindTextDoc(string text, string fileName)
         {
