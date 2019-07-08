@@ -97,7 +97,7 @@ namespace Search_Testing
 
                     var files = Directory.GetFiles(ds, "*.*", System.IO.SearchOption.AllDirectories)
                         .Where(s => s.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xltx", StringComparison.OrdinalIgnoreCase)
-                        || s.EndsWith(".xltm", StringComparison.OrdinalIgnoreCase));
+                        || s.EndsWith(".xltm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".csv", StringComparison.OrdinalIgnoreCase));
 
                     foreach (string file in files)
                     {
