@@ -32,6 +32,7 @@ namespace Search_Testing
             List<string> docFiles = new List<string>();
             List<string> excelFiles = new List<string>();
             List<string> pdfFiles = new List<string>();
+            List<string> textFiles = new List<string>();
             string Print = "";
 
 
@@ -176,6 +177,47 @@ namespace Search_Testing
                 }
                 return pdfFiles;
             }
+
+
+
+            textFiles = DirSearchTextFiles(directorySearch);
+            List<string> DirSearchTextFiles(string ds)
+            {
+                try
+                {
+
+                    var files = Directory.GetFiles(ds, "*.*", System.IO.SearchOption.AllDirectories)
+                        .Where(s => s.EndsWith(".txt", StringComparison.OrdinalIgnoreCase));
+
+                    foreach (string file in files)
+                    {
+                        try
+                        {
+                            string readText = File.ReadAllText(file);
+                            FindTextDoc(readText, file);
+                            Console.WriteLine(file);
+                        }
+                        catch (System.Runtime.InteropServices.COMException)
+                        {
+                            corrupted.Add(file);
+                            FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
+                        }
+                    }
+                }
+                catch (System.UnauthorizedAccessException)
+                {
+                    accessDenied.Add(ds);
+                }
+
+                catch (System.Exception)
+                {
+                    generalErrors.Add(ds);
+                }
+                return excelFiles;
+            }
+
+
+
 
             Console.WriteLine("***************************************");
             accessDenied = accessDenied.Distinct().ToList();
@@ -393,6 +435,31 @@ namespace Search_Testing
             if (containsSSN)
             {
                filesThatConstainSSN.Add(fileName);
+            }
+        }
+
+        private static void FindTextDoc(string text, string fileName)
+        {
+            bool containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d\D");
+            if (!containsSSN)
+            {
+                containsSSN = Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d\D");
+            }
+            if (!containsSSN)
+            {
+                containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d");
+            }
+            if (!containsSSN && Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d") && text.Length == 11)
+            {
+                containsSSN = true;
+            }
+            if (text.ToString().ToLower().Contains("social security number") || text.ToString().ToLower().Contains("ssn") || text.ToString().ToLower().Contains("ss#"))
+            {
+                containsSSN = true;
+            }
+            if (containsSSN)
+            {
+                filesThatConstainSSN.Add(fileName);
             }
         }
 
