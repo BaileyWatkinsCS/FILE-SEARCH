@@ -55,8 +55,9 @@ namespace Search_Testing
             {
                 try
                 {
-                    var files = Directory.EnumerateFiles(ds, "*.*", System.IO.SearchOption.AllDirectories)
-                        .Where(s => s.EndsWith(".doc") || s.EndsWith(".docx") || s.EndsWith(".DOC"));
+                    //Fixes depth with search option. all directories and also fixes if it is capitalized with StringComparison.OrdinalIgnoreCase
+                    var files = Directory.GetFiles(ds, "*.*", System.IO.SearchOption.AllDirectories)
+                        .Where(s => s.EndsWith(".doc", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".docx", StringComparison.OrdinalIgnoreCase));
                     foreach (string file in files)
                     {
                         Word.Application app = new Word.Application();
@@ -72,10 +73,7 @@ namespace Search_Testing
                         }
                         app.Quit();
                     }
-                    foreach (string directory in Directory.GetDirectories(ds))
-                    {
-                        docFiles.AddRange(DirSearchWord(directory));
-                    }
+
                 }
 
                 catch (System.UnauthorizedAccessException)
@@ -96,7 +94,12 @@ namespace Search_Testing
             {
                 try
                 {
-                    foreach (string file in Directory.GetFiles(ds, "*.xlsx"))
+
+                    var files = Directory.GetFiles(ds, "*.*", System.IO.SearchOption.AllDirectories)
+                        .Where(s => s.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xltx", StringComparison.OrdinalIgnoreCase)
+                        || s.EndsWith(".xltm", StringComparison.OrdinalIgnoreCase));
+
+                    foreach (string file in files)
                     {
                         try
                         {
@@ -110,10 +113,6 @@ namespace Search_Testing
                             corrupted.Add(file);
                             FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
                         }
-                    }
-                    foreach (string directory in Directory.GetDirectories(ds))
-                    {
-                        excelFiles.AddRange(DirSearchExcel(directory));
                     }
                 }
                 catch (System.UnauthorizedAccessException)
@@ -136,7 +135,9 @@ namespace Search_Testing
             {
                 try
                 {
-                    foreach (string file in Directory.GetFiles(ds, "*.pdf"))
+                    var files = Directory.GetFiles(ds, "*.*", System.IO.SearchOption.AllDirectories)
+                        .Where(s => s.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase));
+                    foreach (string file in files)
                     {
                         try
                         {
