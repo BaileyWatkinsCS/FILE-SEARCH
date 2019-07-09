@@ -73,17 +73,13 @@ namespace Search_Testing
                             corrupted.Add(file);
                             FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
                         }
-
                         app.Quit();
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
                     {
                         docFiles.AddRange(DirSearchWord(directory));
                     }
-
-
                 }
-
                 catch (System.UnauthorizedAccessException)
                 {
                     accessDenied.Add(ds);
@@ -102,11 +98,9 @@ namespace Search_Testing
             {
                 try
                 {
-
-                    var files = Directory.GetFiles(ds, "*.*")
+                    var files = Directory.EnumerateFiles(ds, "*.*")
                         .Where(s => s.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xltx", StringComparison.OrdinalIgnoreCase)
                         || s.EndsWith(".xltm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".csv", StringComparison.OrdinalIgnoreCase));
-
                     foreach (string file in files)
                     {
                         try
@@ -147,7 +141,7 @@ namespace Search_Testing
             {
                 try
                 {
-                    var files = Directory.GetFiles(ds, "*.*")
+                    var files = Directory.EnumerateFiles(ds, "*.*")
                         .Where(s => s.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase));
                     foreach (string file in files)
                     {
@@ -189,15 +183,12 @@ namespace Search_Testing
                 return pdfFiles;
             }
 
-
-
             textFiles = DirSearchTextFiles(directorySearch);
             List<string> DirSearchTextFiles(string ds)
             {
                 try
                 {
-
-                    var files = Directory.GetFiles(ds, "*.*")
+                    var files = Directory.EnumerateFiles(ds, "*.*")
                         .Where(s => s.EndsWith(".txt", StringComparison.OrdinalIgnoreCase));
 
                     foreach (string file in files)
@@ -230,16 +221,11 @@ namespace Search_Testing
                 }
                 return excelFiles;
             }
-
-
-
-
             Console.WriteLine("***************************************");
             accessDenied = accessDenied.Distinct().ToList();
             Console.WriteLine("Files That Contain SSN Formating: ");
             Console.WriteLine("");
             filesThatConstainSSN.ForEach(Console.WriteLine);
-
 
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
 
@@ -282,13 +268,8 @@ namespace Search_Testing
                     {
                         writer.WriteLine(ge);
                     }
-
-
                     writer.Close();
-
                 }
-
-
             }
             try
             {
@@ -428,8 +409,6 @@ namespace Search_Testing
             GC.Collect();
         }
 
-        
-
         private static void FindTextDoc(string text, string fileName)
         {
             bool containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d\D");
@@ -452,31 +431,6 @@ namespace Search_Testing
             if (containsSSN)
             {
                 filesThatConstainSSN.Add(fileName);
-            }
-        }
-
-
-        public static IEnumerable<string> GetFiles(string root, string searchPattern)
-        {
-            Stack<string> pending = new Stack<string>();
-            pending.Push(root);
-            while (pending.Count != 0)
-            {
-                var path = pending.Pop();
-                string[] next = null;
-                try
-                {
-                    next = Directory.GetFiles(path, searchPattern);
-                }
-                catch { }
-                if (next != null && next.Length != 0)
-                    foreach (var file in next) yield return file;
-                try
-                {
-                    next = Directory.GetDirectories(path);
-                    foreach (var subdir in next) pending.Push(subdir);
-                }
-                catch { }
             }
         }
 
