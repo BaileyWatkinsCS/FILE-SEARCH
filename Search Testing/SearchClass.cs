@@ -13,6 +13,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Microsoft.VisualBasic.FileIO;
 using System.Diagnostics;
+using System.Text;
 
 namespace Search_Testing
 {
@@ -39,7 +40,7 @@ namespace Search_Testing
             //Console Enter
             Console.WriteLine("Enter File Path");
             directorySearch = Console.ReadLine();
-            while(!Directory.Exists(directorySearch))
+            while (!Directory.Exists(directorySearch))
             {
                 Console.WriteLine("Enter a VALID File Path");
                 directorySearch = Console.ReadLine();
@@ -47,8 +48,8 @@ namespace Search_Testing
 
 
             Console.WriteLine("***************************************");
-            
-            
+
+
             // doc files
 
             docFiles = DirSearchWord(directorySearch);
@@ -65,13 +66,13 @@ namespace Search_Testing
                         Word.Application app = new Word.Application();
                         try
                         {
-                            FindWord(app, file);
+                            FindTextDoc(GetTextFromWord(app, file), file);
+
                             Console.WriteLine(file);
                         }
-                        catch(System.Runtime.InteropServices.COMException)
+                        catch (System.Runtime.InteropServices.COMException)
                         {
                             corrupted.Add(file);
-                            FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
                         }
                         app.Quit();
                     }
@@ -113,7 +114,6 @@ namespace Search_Testing
                         catch (System.Runtime.InteropServices.COMException)
                         {
                             corrupted.Add(file);
-                            FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
                         }
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
@@ -162,7 +162,6 @@ namespace Search_Testing
                         catch (System.Runtime.InteropServices.COMException)
                         {
                             corrupted.Add(file);
-                            FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
                         }
 
                     }
@@ -176,7 +175,7 @@ namespace Search_Testing
                     accessDenied.Add(ds);
                 }
 
-                catch (System.Exception )
+                catch (System.Exception)
                 {
                     generalErrors.Add(ds);
                 }
@@ -202,7 +201,6 @@ namespace Search_Testing
                         catch (System.Runtime.InteropServices.COMException)
                         {
                             corrupted.Add(file);
-                            FileSystem.DeleteFile(file, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin, UICancelOption.DoNothing);
                         }
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
@@ -254,10 +252,6 @@ namespace Search_Testing
                     }
                     writer.WriteLine();
                     writer.WriteLine("***********Corrupted File*************");
-                    writer.WriteLine("NOTE: If file was corrupted it was moved to the recycle bin!");
-                    writer.WriteLine("In most cases this is not used by you and is a invalid copy of a document");
-                    writer.WriteLine("If you want it back just go to the recycle bin and restore it!");
-                    writer.WriteLine("");
                     foreach (String c in corrupted)
                     {
                         writer.WriteLine(c);
@@ -281,61 +275,16 @@ namespace Search_Testing
             }
         }
 
-        public static void FindWord(Word.Application WordApp, string Wfile)
-        {
-            WordApp.Visible = false;
-            object missing = System.Reflection.Missing.Value;
-            object filename = Wfile;
-            Microsoft.Office.Interop.Word.Document objDoc;
-            objDoc = WordApp.Documents.Open(ref filename, ref missing, ref missing, ref missing,
-            ref missing, ref missing, ref missing, ref missing,
-            ref missing, ref missing, ref missing, ref missing, ref missing, ref missing,
-            ref missing, ref missing);
-            objDoc.Content.Find.ClearFormatting();
-            try
-            {
-                string text = objDoc.Content.Text;
-                bool containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d\D");
-                if (!containsSSN)
-                {
-                    containsSSN = Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d\D");
-                }
-                if (!containsSSN)
-                {
-                    containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d");
-                }
-                if (!containsSSN && Regex.IsMatch(text, @"\d\d\d-\d\d-\d\d\d\d") && text.Length == 11)
-                {
-                    containsSSN = true;
-                }
-                if (text.ToString().ToLower().Contains("social security number") || text.ToString().ToLower().Contains("ssn") || text.ToString().ToLower().Contains("ss#"))
-                {
-                    containsSSN = true;
-                }
-                if (containsSSN)
-                {
-                    filesThatConstainSSN.Add(Wfile);
-                }
-                objDoc.Close(ref missing, ref missing, ref missing);
-                WordApp.Application.Quit(ref missing, ref missing, ref missing);
-            }
-            catch (Exception)
-            {
-                objDoc.Close(ref missing, ref missing, ref missing);
-                WordApp.Application.Quit(ref missing, ref missing, ref missing);
-            }
-        }
-
-        private static void FindExcel(Excel.Application oXL,string findText, string Wfile)
+        private static void FindExcel(Excel.Application oXL, string findText, string Wfile)
         {
             string File_name = Wfile;
             Microsoft.Office.Interop.Excel.Workbook oWB = null;
             Microsoft.Office.Interop.Excel.Worksheet oSheet = null;
             Application _excelApp = new Application();
-            Workbook workBook = _excelApp.Workbooks.Open(Wfile);            
+            Workbook workBook = _excelApp.Workbooks.Open(Wfile);
             int numSheets = workBook.Sheets.Count;
-            bool ExitNow = true;
-            while (numSheets > 0 && ExitNow != false)
+
+            while (numSheets > 0 && filesThatConstainSSN.Contains(Wfile) != true)
             {
                 try
                 {
@@ -345,31 +294,10 @@ namespace Search_Testing
                         missing, missing, missing, missing);
                     oSheet = (Microsoft.Office.Interop.Excel.Worksheet)oWB.Worksheets[numSheets];
                     Microsoft.Office.Interop.Excel.Range oRng = GetSpecifiedRange(findText, oSheet);
-                    if(oRng != null)
+                    if (oRng != null)
                     {
                         string str = oRng.Text;
-                        bool containsSSN = Regex.IsMatch(str, @"\D\d\d\d-\d\d-\d\d\d\d\D");
-                        if (!containsSSN)
-                        {
-                            containsSSN = Regex.IsMatch(str, @"\d\d\d-\d\d-\d\d\d\d\D");
-                        }
-                        if (!containsSSN)
-                        {
-                            containsSSN = Regex.IsMatch(str, @"\D\d\d\d-\d\d-\d\d\d\d");
-                        }
-                        if (!containsSSN && Regex.IsMatch(str, @"\d\d\d-\d\d-\d\d\d\d") && str.Length == 11)
-                        {
-                            containsSSN = true;
-                        }
-                        if (str.ToString().ToLower().Contains("social security number") || str.ToString().ToLower().Contains("ssn") || str.ToString().ToLower().Contains("ss#"))
-                        {
-                            containsSSN = true;
-                        }
-                        if (containsSSN)
-                        {
-                            filesThatConstainSSN.Add(Wfile);
-                            ExitNow = false;
-                        }
+                        FindTextDoc(str, Wfile);
                     }
                 }
                 catch (Exception)
@@ -408,9 +336,22 @@ namespace Search_Testing
             oXL = null;
             GC.Collect();
         }
-
+        private static Microsoft.Office.Interop.Excel.Range GetSpecifiedRange(string matchStr, Microsoft.Office.Interop.Excel.Worksheet objWs)
+        {
+            object missing = System.Reflection.Missing.Value;
+            Microsoft.Office.Interop.Excel.Range currentFind = null;
+            Excel.Range last = objWs.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell, Type.Missing);
+            currentFind = objWs.get_Range("A1", last).Find(matchStr, missing,
+                           Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
+                           Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
+                           Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
+                           Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
+            return currentFind;
+        }
         private static void FindTextDoc(string text, string fileName)
         {
+            text.Replace('\n', ' ');
+            text.Replace('\r', ' ');
             bool containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d\D");
             if (!containsSSN)
             {
@@ -424,7 +365,7 @@ namespace Search_Testing
             {
                 containsSSN = true;
             }
-            if (text.ToString().ToLower().Contains("social security number") || text.ToString().ToLower().Contains("ssn") || text.ToString().ToLower().Contains("ss#"))
+            if (text.ToString().ToLower().Contains(" social security number ") || text.ToString().ToLower().Contains(" ssn ") || text.ToString().ToLower().Contains(" ss# "))
             {
                 containsSSN = true;
             }
@@ -434,17 +375,18 @@ namespace Search_Testing
             }
         }
 
-        private static Microsoft.Office.Interop.Excel.Range GetSpecifiedRange(string matchStr, Microsoft.Office.Interop.Excel.Worksheet objWs)
+        private static string GetTextFromWord(Word.Application WordApp, string file)
         {
-            object missing = System.Reflection.Missing.Value;
-            Microsoft.Office.Interop.Excel.Range currentFind = null;
-            currentFind = objWs.get_Range("A1", "AAA1000").Find(matchStr, missing,
-                           Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
-                           Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
-                           Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
-                           Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
-            return currentFind;
-        } 
+            StringBuilder text = new StringBuilder();
+            object miss = System.Reflection.Missing.Value;
+            object path = file;
+            object readOnly = true;
+            Microsoft.Office.Interop.Word.Document docs = WordApp.Documents.Open(ref path, ref miss, ref readOnly, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss);
+            string WordText = docs.Range().Text;
+
+            docs.Application.Quit();
+            return WordText;
+        }
     }
 }
 
