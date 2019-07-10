@@ -107,8 +107,10 @@ namespace Search_Testing
                         try
                         {   //opens word app here so it can be easily disposed
                             Microsoft.Office.Interop.Excel.Application oXL = new Microsoft.Office.Interop.Excel.Application();
+
                             //? is used for any charcter in excel
                             FindExcel(oXL, file);
+
                             Console.WriteLine(file);
                         }
                         catch (System.Runtime.InteropServices.COMException)
