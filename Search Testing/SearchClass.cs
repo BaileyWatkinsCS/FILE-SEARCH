@@ -24,7 +24,7 @@ namespace Search_Testing
         static List<string> corrupted = new List<string>();
         static List<string> generalErrors = new List<string>();
 
-        //Need this for dialog box to save dont know why?
+        //Need this for dialog box to save
         [STAThread]
 
         public static void Main(string[] args)
@@ -36,7 +36,6 @@ namespace Search_Testing
             List<string> textFiles = new List<string>();
             string Print = "";
 
-
             //Console Enter
             Console.WriteLine("Enter File Path");
             directorySearch = Console.ReadLine();
@@ -45,29 +44,28 @@ namespace Search_Testing
                 Console.WriteLine("Enter a VALID File Path");
                 directorySearch = Console.ReadLine();
             }
-
-
             Console.WriteLine("***************************************");
 
-
             // doc files
-
             docFiles = DirSearchWord(directorySearch);
             List<string> DirSearchWord(string ds)
             {
                 try
                 {
-                    //Fixes depth with search option. all directories and also fixes if it is capitalized with StringComparison.OrdinalIgnoreCase
+                    //Searches all directories and checks their file extentions
                     var files = Directory.EnumerateFiles(ds, "*.*")
                         .Where(s => s.EndsWith(".doc", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".docx", StringComparison.OrdinalIgnoreCase));
 
                     foreach (string file in files)
                     {
+                        //opens word app here so it can be easily disposed
                         Word.Application app = new Word.Application();
                         try
                         {
+                            //calls get text word and find text doc which do all the checks
                             FindTextDoc(GetTextFromWord(app, file), file);
 
+                            //Prints the file that is opened (doesnt for any files that are: corrupted, acces denied or any other erros
                             Console.WriteLine(file);
                         }
                         catch (System.Runtime.InteropServices.COMException)
@@ -78,6 +76,7 @@ namespace Search_Testing
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
                     {
+                        //goes into subdirectores/folders
                         docFiles.AddRange(DirSearchWord(directory));
                     }
                 }
@@ -99,15 +98,16 @@ namespace Search_Testing
             {
                 try
                 {
+                    //Searches all directories and checks their file extentions
                     var files = Directory.EnumerateFiles(ds, "*.*")
                         .Where(s => s.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xltx", StringComparison.OrdinalIgnoreCase)
                         || s.EndsWith(".xltm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".csv", StringComparison.OrdinalIgnoreCase));
                     foreach (string file in files)
                     {
                         try
-                        {
+                        {   //opens word app here so it can be easily disposed
                             Microsoft.Office.Interop.Excel.Application oXL = new Microsoft.Office.Interop.Excel.Application();
-                            //? is used for any charcter in excel
+                            //? is used for any charcter in excel (It goes more in depth in the function)
                             FindExcel(oXL, "???-??-????", file);
                             Console.WriteLine(file);
                         }
@@ -118,6 +118,7 @@ namespace Search_Testing
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
                     {
+                        //goes into subdirectores/folders
                         excelFiles.AddRange(DirSearchExcel(directory));
                     }
                 }
@@ -140,7 +141,7 @@ namespace Search_Testing
             List<string> DirSearchPDF(string ds)
             {
                 try
-                {
+                {   //Searches all directories and checks their file extentions
                     var files = Directory.EnumerateFiles(ds, "*.*")
                         .Where(s => s.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase));
                     foreach (string file in files)
@@ -155,8 +156,9 @@ namespace Search_Testing
                             }
                             else
                             {
-                                Console.WriteLine(file);
+                                //finds text in pdf after extracted from pdf
                                 FindTextDoc(currentPdfText, file);
+                                Console.WriteLine(file);
                             }
                         }
                         catch (System.Runtime.InteropServices.COMException)
@@ -167,6 +169,7 @@ namespace Search_Testing
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
                     {
+                        //goes into subdirectores/folders
                         pdfFiles.AddRange(DirSearchPDF(directory));
                     }
                 }
@@ -187,6 +190,7 @@ namespace Search_Testing
             {
                 try
                 {
+                    //Searches all directories and checks their file extentions
                     var files = Directory.EnumerateFiles(ds, "*.*")
                         .Where(s => s.EndsWith(".txt", StringComparison.OrdinalIgnoreCase));
 
@@ -194,6 +198,7 @@ namespace Search_Testing
                     {
                         try
                         {
+                            //extracts all the text from a textfile into a string which we then parse through
                             string readText = File.ReadAllText(file);
                             FindTextDoc(readText, file);
                             Console.WriteLine(file);
@@ -205,6 +210,7 @@ namespace Search_Testing
                     }
                     foreach (string directory in Directory.GetDirectories(ds))
                     {
+                        //goes into subdirectores/folders
                         textFiles.AddRange(DirSearchTextFiles(directory));
                     }
                 }
@@ -225,13 +231,15 @@ namespace Search_Testing
             Console.WriteLine("");
             filesThatConstainSSN.ForEach(Console.WriteLine);
 
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog
+            {
+                InitialDirectory = @"*\Documents", //intial location for save
+                Filter = "Microsoft Word Documents|*.DOC | txt files (*.txt)|*.txt|All files (*.*)|*.*", // or just "txt files (*.txt)|*.txt" if you only want to save text files
+                FilterIndex = 2,
+                RestoreDirectory = true
+            };
 
-            saveFileDialog1.InitialDirectory = @"*\Documents";
-            saveFileDialog1.Filter = "Microsoft Word Documents|*.DOC | txt files (*.txt)|*.txt|All files (*.*)|*.*"; // or just "txt files (*.txt)|*.txt" if you only want to save text files
-            saveFileDialog1.FilterIndex = 2;
-            saveFileDialog1.RestoreDirectory = true;
-
+            //Writes to a textfile with headers
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 Print = saveFileDialog1.FileName;
@@ -245,10 +253,10 @@ namespace Search_Testing
                     }
                     writer.WriteLine();
                     writer.WriteLine();
-                    writer.WriteLine("***********Acces Was Denied***********");
-                    foreach (String ad in accessDenied)
+                    writer.WriteLine("********Unkown/General Errors*********");
+                    foreach (String ge in generalErrors)
                     {
-                        writer.WriteLine(ad);
+                        writer.WriteLine(ge);
                     }
                     writer.WriteLine();
                     writer.WriteLine("***********Corrupted File*************");
@@ -257,27 +265,28 @@ namespace Search_Testing
                         writer.WriteLine(c);
                     }
                     writer.WriteLine();
-                    writer.WriteLine("********Unkown/General Errors*********");
-                    foreach (String ge in generalErrors)
+                    writer.WriteLine("***********Acces Was Denied***********");
+                    foreach (String ad in accessDenied)
                     {
-                        writer.WriteLine(ge);
+                        writer.WriteLine(ad);
                     }
                     writer.Close();
                 }
             }
             try
             {
+                //tries to opne save document if it wasnt saved we catch the excepion 
                 Process.Start(Print);
             }
             catch
             {
                 Console.WriteLine("File Was Not Saved!");
+                Console.ReadLine();
             }
         }
 
         private static void FindExcel(Excel.Application oXL, string findText, string Wfile)
         {
-            string File_name = Wfile;
             Microsoft.Office.Interop.Excel.Workbook oWB = null;
             Microsoft.Office.Interop.Excel.Worksheet oSheet = null;
             Application _excelApp = new Application();
@@ -289,7 +298,7 @@ namespace Search_Testing
                 try
                 {
                     object missing = System.Reflection.Missing.Value;
-                    oWB = oXL.Workbooks.Open(File_name, missing, missing, missing, missing,
+                    oWB = oXL.Workbooks.Open(Wfile, missing, missing, missing, missing,
                         missing, missing, missing, missing, missing, missing,
                         missing, missing, missing, missing);
                     oSheet = (Microsoft.Office.Interop.Excel.Worksheet)oWB.Worksheets[numSheets];
