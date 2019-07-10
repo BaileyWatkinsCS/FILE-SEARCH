@@ -54,7 +54,7 @@ namespace Search_Testing
                 {
                     //Searches all directories and checks their file extentions
                     var files = Directory.EnumerateFiles(ds, "*.*")
-                        .Where(s => s.EndsWith(".doc", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".docx", StringComparison.OrdinalIgnoreCase));
+                     .Where(s => s.EndsWith(".doc", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".docx", StringComparison.OrdinalIgnoreCase));
 
                     foreach (string file in files)
                     {
@@ -84,7 +84,6 @@ namespace Search_Testing
                 {
                     accessDenied.Add(ds);
                 }
-
                 catch (System.Exception)
                 {
                     generalErrors.Add(ds);
@@ -94,18 +93,19 @@ namespace Search_Testing
 
             //Excel Documents
             excelFiles = DirSearchExcel(directorySearch);
+
             List<string> DirSearchExcel(string ds)
             {
                 try
                 {
                     //Searches all directories and checks their file extentions
                     var files = Directory.EnumerateFiles(ds, "*.*")
-                        .Where(s => s.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xltx", StringComparison.OrdinalIgnoreCase)
-                        || s.EndsWith(".xltm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".csv", StringComparison.OrdinalIgnoreCase));
+                     .Where(s => s.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xlsm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".xltx", StringComparison.OrdinalIgnoreCase) ||
+                      s.EndsWith(".xltm", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".csv", StringComparison.OrdinalIgnoreCase));
                     foreach (string file in files)
                     {
                         try
-                        {   //opens word app here so it can be easily disposed
+                        { //opens word app here so it can be easily disposed
                             Microsoft.Office.Interop.Excel.Application oXL = new Microsoft.Office.Interop.Excel.Application();
 
                             //? is used for any charcter in excel
@@ -128,7 +128,6 @@ namespace Search_Testing
                 {
                     accessDenied.Add(ds);
                 }
-
                 catch (System.Exception)
                 {
                     generalErrors.Add(ds);
@@ -143,9 +142,9 @@ namespace Search_Testing
             List<string> DirSearchPDF(string ds)
             {
                 try
-                {   //Searches all directories and checks their file extentions
+                { //Searches all directories and checks their file extentions
                     var files = Directory.EnumerateFiles(ds, "*.*")
-                        .Where(s => s.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase));
+                     .Where(s => s.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase));
                     foreach (string file in files)
                     {
                         try
@@ -179,7 +178,6 @@ namespace Search_Testing
                 {
                     accessDenied.Add(ds);
                 }
-
                 catch (System.Exception)
                 {
                     generalErrors.Add(ds);
@@ -194,7 +192,7 @@ namespace Search_Testing
                 {
                     //Searches all directories and checks their file extentions
                     var files = Directory.EnumerateFiles(ds, "*.*")
-                        .Where(s => s.EndsWith(".txt", StringComparison.OrdinalIgnoreCase));
+                     .Where(s => s.EndsWith(".txt", StringComparison.OrdinalIgnoreCase));
 
                     foreach (string file in files)
                     {
@@ -220,7 +218,6 @@ namespace Search_Testing
                 {
                     accessDenied.Add(ds);
                 }
-
                 catch (System.Exception)
                 {
                     generalErrors.Add(ds);
@@ -295,22 +292,27 @@ namespace Search_Testing
             Workbook workBook = _excelApp.Workbooks.Open(Wfile);
             int numSheets = workBook.Sheets.Count;
 
+            //until a the file is added or until it runs out of sheets to check
             while (numSheets > 0 && filesThatConstainSSN.Contains(Wfile) != true)
             {
                 try
                 {
                     object missing = System.Reflection.Missing.Value;
                     oWB = oXL.Workbooks.Open(Wfile, missing, missing, missing, missing,
-                        missing, missing, missing, missing, missing, missing,
-                        missing, missing, missing, missing);
+                     missing, missing, missing, missing, missing, missing,
+                     missing, missing, missing, missing);
+                    //used for number of worksheets
                     oSheet = (Microsoft.Office.Interop.Excel.Worksheet)oWB.Worksheets[numSheets];
+                    //gets range of cells where format is similar
                     Microsoft.Office.Interop.Excel.Range oRng = GetSpecifiedRange(oSheet);
+                    //checks ti see if anything exists, makes a string then checks exact format
                     if (oRng != null)
                     {
                         string str = oRng.Text.ToString();
                         FindTextDoc(str, Wfile);
                     }
                 }
+                //closes up if there is an exception
                 catch (Exception)
                 {
                     oXL.DisplayAlerts = false;
@@ -349,6 +351,7 @@ namespace Search_Testing
         }
         private static Microsoft.Office.Interop.Excel.Range GetSpecifiedRange(Microsoft.Office.Interop.Excel.Worksheet objWs)
         {
+            //gets range of cells with certain format then return the object
             object missing = System.Reflection.Missing.Value;
             Microsoft.Office.Interop.Excel.Range pattern = null;
             Microsoft.Office.Interop.Excel.Range ssn = null;
@@ -356,29 +359,31 @@ namespace Search_Testing
             Microsoft.Office.Interop.Excel.Range socsecnum = null;
             Microsoft.Office.Interop.Excel.Range merger = null;
             Excel.Range last = objWs.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell, Type.Missing);
+            //finds the format of numbers that are ssn
             pattern = objWs.get_Range("A1", last).Find("???-??-????", missing,
-                           Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
-                           Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
-                           Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
-                           Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
+             Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
+             Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
+             Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
+             Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
             ssn = objWs.get_Range("A1", last).Find("SSN", missing,
-                           Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
-                           Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
-                           Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
-                           Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
+             Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
+             Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
+             Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
+             Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
             ssnum = objWs.get_Range("A1", last).Find("ss#", missing,
-                           Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
-                           Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
-                           Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
-                           Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
+             Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
+             Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
+             Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
+             Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
             socsecnum = objWs.get_Range("A1", last).Find("social security number", missing,
-                           Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
-                           Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
-                           Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
-                           Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
+             Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
+             Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
+             Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
+             Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
+            //if it finds a matching pattern it will either add or merge if there is an object that matches the above find.
             if (pattern != null)
             {
-                if(merger == null)
+                if (merger == null)
                 {
                     merger = pattern;
                 }
@@ -424,8 +429,10 @@ namespace Search_Testing
         }
         private static void FindTextDoc(string text, string fileName)
         {
+            //checks the past in text to see if it fits format
             text.Replace('\n', ' ');
             text.Replace('\r', ' ');
+            // \D is not digit, \d is digit
             bool containsSSN = Regex.IsMatch(text, @"\D\d\d\d-\d\d-\d\d\d\d\D");
             if (!containsSSN)
             {
@@ -439,8 +446,8 @@ namespace Search_Testing
             {
                 containsSSN = true;
             }
-            if (text.ToString().ToLower().Contains("social security number") || text.ToString().ToLower().Contains(" ssn ") || text.ToString().ToLower().Contains(" ss# ")
-                || (text.ToString().ToLower().Contains("ssn") && text.Length == 3) || (text.ToString().ToLower().Contains("ss#") && text.Length == 3))
+            if (text.ToString().ToLower().Contains("social security number") || text.ToString().ToLower().Contains(" ssn ") || text.ToString().ToLower().Contains(" ss# ") ||
+             (text.ToString().ToLower().Contains("ssn") && text.Length == 3) || (text.ToString().ToLower().Contains("ss#") && text.Length == 3))
             {
                 containsSSN = true;
             }
@@ -452,16 +459,15 @@ namespace Search_Testing
 
         private static string GetTextFromWord(Word.Application WordApp, string file)
         {
+            //converts document to string
             StringBuilder text = new StringBuilder();
             object miss = System.Reflection.Missing.Value;
             object path = file;
             object readOnly = true;
             Microsoft.Office.Interop.Word.Document docs = WordApp.Documents.Open(ref path, ref miss, ref readOnly, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss, ref miss);
             string WordText = docs.Range().Text;
-
             docs.Application.Quit();
             return WordText;
         }
     }
 }
-
