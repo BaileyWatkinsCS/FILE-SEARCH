@@ -108,7 +108,7 @@ namespace Search_Testing
                         {
                             Microsoft.Office.Interop.Excel.Application oXL = new Microsoft.Office.Interop.Excel.Application();
                             //? is used for any charcter in excel
-                            FindExcel(oXL, "???-??-????", file);
+                            FindExcel(oXL, file);
                             Console.WriteLine(file);
                         }
                         catch (System.Runtime.InteropServices.COMException)
@@ -275,7 +275,7 @@ namespace Search_Testing
             }
         }
 
-        private static void FindExcel(Excel.Application oXL, string findText, string Wfile)
+        private static void FindExcel(Excel.Application oXL, string Wfile)
         {
             string File_name = Wfile;
             Microsoft.Office.Interop.Excel.Workbook oWB = null;
@@ -293,14 +293,14 @@ namespace Search_Testing
                         missing, missing, missing, missing, missing, missing,
                         missing, missing, missing, missing);
                     oSheet = (Microsoft.Office.Interop.Excel.Worksheet)oWB.Worksheets[numSheets];
-                    Microsoft.Office.Interop.Excel.Range oRng = GetSpecifiedRange(findText, oSheet);
+                    Microsoft.Office.Interop.Excel.Range oRng = GetSpecifiedRange(oSheet);
                     if (oRng != null)
                     {
-                        string str = oRng.Text;
+                        string str = oRng.Text.ToString();
                         FindTextDoc(str, Wfile);
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     oXL.DisplayAlerts = false;
                     workBook.Close(null, null, null);
@@ -336,17 +336,80 @@ namespace Search_Testing
             oXL = null;
             GC.Collect();
         }
-        private static Microsoft.Office.Interop.Excel.Range GetSpecifiedRange(string matchStr, Microsoft.Office.Interop.Excel.Worksheet objWs)
+        private static Microsoft.Office.Interop.Excel.Range GetSpecifiedRange(Microsoft.Office.Interop.Excel.Worksheet objWs)
         {
             object missing = System.Reflection.Missing.Value;
-            Microsoft.Office.Interop.Excel.Range currentFind = null;
+            Microsoft.Office.Interop.Excel.Range pattern = null;
+            Microsoft.Office.Interop.Excel.Range ssn = null;
+            Microsoft.Office.Interop.Excel.Range ssnum = null;
+            Microsoft.Office.Interop.Excel.Range socsecnum = null;
+            Microsoft.Office.Interop.Excel.Range merger = null;
             Excel.Range last = objWs.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell, Type.Missing);
-            currentFind = objWs.get_Range("A1", last).Find(matchStr, missing,
+            pattern = objWs.get_Range("A1", last).Find("???-??-????", missing,
                            Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
                            Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
                            Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
                            Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
-            return currentFind;
+            ssn = objWs.get_Range("A1", last).Find("SSN", missing,
+                           Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
+                           Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
+                           Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
+                           Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
+            ssnum = objWs.get_Range("A1", last).Find("ss#", missing,
+                           Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
+                           Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
+                           Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
+                           Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
+            socsecnum = objWs.get_Range("A1", last).Find("social security number", missing,
+                           Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
+                           Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
+                           Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
+                           Microsoft.Office.Interop.Excel.XlSearchDirection.xlNext, false, missing, missing);
+            if (pattern != null)
+            {
+                if(merger == null)
+                {
+                    merger = pattern;
+                }
+                else
+                {
+                    merger.Application.Union(merger, pattern);
+                }
+            }
+            if (ssn != null)
+            {
+                if (merger == null)
+                {
+                    merger = ssn;
+                }
+                else
+                {
+                    merger.Application.Union(merger, ssn);
+                }
+            }
+            if (ssnum != null)
+            {
+                if (merger == null)
+                {
+                    merger = ssnum;
+                }
+                else
+                {
+                    merger.Application.Union(merger, ssnum);
+                }
+            }
+            if (socsecnum != null)
+            {
+                if (merger == null)
+                {
+                    merger = socsecnum;
+                }
+                else
+                {
+                    merger.Application.Union(merger, socsecnum);
+                }
+            }
+            return merger;
         }
         private static void FindTextDoc(string text, string fileName)
         {
@@ -365,7 +428,8 @@ namespace Search_Testing
             {
                 containsSSN = true;
             }
-            if (text.ToString().ToLower().Contains(" social security number ") || text.ToString().ToLower().Contains(" ssn ") || text.ToString().ToLower().Contains(" ss# "))
+            if (text.ToString().ToLower().Contains("social security number") || text.ToString().ToLower().Contains(" ssn ") || text.ToString().ToLower().Contains(" ss# ")
+                || (text.ToString().ToLower().Contains("ssn") && text.Length == 3) || (text.ToString().ToLower().Contains("ss#") && text.Length == 3))
             {
                 containsSSN = true;
             }
